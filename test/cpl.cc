@@ -82,14 +82,14 @@ int main(int argc, char **argv){
   coupler::Part3Mesh3D p3m3d(p1pp3d, numsurf, block_count, xgc_versurf, xgc_cce->data(), xgc_xcoords->data(), xgc_zcoords, preproc);
   const int nummode = 1;
   coupler::BoundaryDescr3D bdesc(p3m3d, p1pp3d, test_case, preproc);
-  if(!p1pp3d.mype)std::cerr << "0.8"<< "\n"; 
+  std::cerr << "0.8"<< "\n"; 
 
   coupler::Part1ParalPar3D* mesh1;
   mesh1=&p1pp3d;
   coupler::Part3Mesh3D*     mesh3;
   mesh3=&p3m3d;
   coupler::DatasProc3D dp3d(mesh1, mesh3, preproc, test_case, ypar, nummode);
-  if(!p1pp3d.mype)std::cerr << "0.9"<< "\n";
+  std::cerr << "0.9"<< "\n";
   MPI_Barrier(MPI_COMM_WORLD);
   coupler::destroy(q_prof);
   coupler::destroy(gene_xval);
@@ -133,6 +133,7 @@ int main(int argc, char **argv){
       coupler::GO INDS1d[2]={0,p3m3d.lj0*p3m3d.blockcount};
       MPI_Barrier(MPI_COMM_WORLD);
       std::cout<<"p3m3d.lj0*p3m3d.blockcount="<<p3m3d.lj0*p3m3d.blockcount<<'\n';
+      if(p1pp3d.mype_y==p1pp3d.mype_z==0)
       coupler::printSumm1D(dp3d.denssend,INDS1d,realsum,p1pp3d.comm_x,"densitytoXGC",m);
 
       if(!debug){

@@ -151,7 +151,7 @@ namespace coupler {
     const std::string fname = dir + "/" + name + ".bp";
   
     if(!eng){
-      read_io.SetEngine("Sst");
+      read_io.SetEngine("BP4");
       read_io.SetParameters({
           {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "480"}
@@ -184,6 +184,7 @@ namespace coupler {
     adios_var.SetSelection(sel);
     eng.Get(adios_var, field->data());
     eng.EndStep();
+    std::cerr << rank <<  ": receive " << name << " done \n";
     return field;
   }
   
@@ -198,7 +199,7 @@ namespace coupler {
     const std::string fname = dir + "/" + name + ".bp";
   
     if(!eng){
-      read_io.SetEngine("Sst");
+      read_io.SetEngine("BP4");
       read_io.SetParameters({
           {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "480"}
@@ -228,6 +229,7 @@ namespace coupler {
     adios_var.SetSelection(sel);
     eng.Get(adios_var, val);
     eng.EndStep();
+    std::cerr << rank <<  ": receive " << name << " done \n";
     return val;
   } 
   
@@ -245,14 +247,14 @@ namespace coupler {
     std::cout<<fname<<'\n'; 
     if(m==0){
       std::cout<<"creat engine for: "<<name<<'\n';
-      read_io.SetEngine("Sst");
+      read_io.SetEngine("BP4");
       read_io.SetParameters({
           {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "800"}
           });
       std::cout<<"engine parameters are set"<<'\n';
       eng = read_io.Open(fname, adios2::Mode::Read);
-      if(!rank) std::cerr << rank << ": " << name << " engine created\n";
+      if(!rank) std::cout << rank << ": " << name << " engine created\n";
     } else{
       std::cerr << rank << ": receive engine already exists \n";
       assert(eng);
@@ -294,7 +296,7 @@ namespace coupler {
     const::adios2::Dims l_dims({a2d->localW(), a2d->localH()});
     const std::string fname = dir + "/" + name + ".bp";
     if (!engine){
-      coupling_io.SetEngine("Sst");
+      coupling_io.SetEngine("BP4");
       send_id = coupling_io.DefineVariable<T>(name,
           g_dims, g_offset, l_dims);
       adios2::Engine  engine = coupling_io.Open(fname, adios2::Mode::Write);
@@ -341,7 +343,7 @@ template<typename T>
     const std::string fname = cce_folder + "/" + fldname + ".bp";
   
     if(m==0){
-      sendIO.SetEngine("Sst");
+      sendIO.SetEngine("BP4");
       sendIO.SetParameters({
       {"OpenTimeoutSecs", "480"}
           });

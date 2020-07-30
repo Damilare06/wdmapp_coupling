@@ -379,14 +379,14 @@ void DatasProc3D::DistriDensiRecvfromPart1(const Array2d<CV>* densityfromGENE)
     }
   }
    for(LO i=0;i<p1->li0;i++){
-     free(blocktmp[i]);
+     delete [] blocktmp[i];
    }
-   free(blocktmp);
+   delete [] blocktmp;
    blocktmp=NULL;
    for(LO i=0;i<p1->lj0;i++){
-     free(tmp[i]);
+     delete [] tmp[i];
    }  
-   free(tmp);
+   delete [] tmp;
    tmp=NULL;
 }
 
@@ -448,8 +448,8 @@ void DatasProc3D::oldAssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
         denssend[j*p3->blockcount+h] = blocktmp[h];
     } 
   }
-  free(recvcount);
-  free(rdispls);
+  delete[] recvcount;
+  delete[] rdispls;
   free(blocktmp);
 }
 
@@ -513,10 +513,10 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   }
 
   for(LO i=0;i<p1->li0;i++){
-    for(LO j=0;j<p3->lj0;j++) free(loc_data[i][j]);
-    free(loc_data[i]);
+    for(LO j=0;j<p3->lj0;j++) delete [] loc_data[i][j];
+    delete [] loc_data[i];
   }
-  free(loc_data);
+  delete [] loc_data;
 
 //don't understand the above operation   
 
@@ -544,6 +544,7 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
         recvcount[h]=0;
         rdispls[h]=0;
       }
+      if(p1->mype_y==p1->mype_x==0)
       MPI_Allgather(&p3->mylk0[i],1,mpitype,recvcount,1,mpitype,p1->comm_z); 
       rdispls[0]=0;
       for(LO k=1;k<p1->npz;k++){
@@ -561,7 +562,9 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 	std::cout<<"num versurf[xl]="<<num<<" "<<p3->versurf[xl]<<'\n';
 	assert(num==p3->versurf[xl]);
       }     
-
+      std::cerr<<"rank "<< p1->mype<<" i: "<<i<<", tmp[i]: "<<tmp[i]<<", p3->mylk0[i]: "<<p3->mylk0[i]<<"\n";
+      fprintf(stderr, "rank %d, i: %d, tmp[i] %p\n", p1->mype, i, tmp[i]);
+      if(p1->mype_y==p1->mype_x==0)
       MPI_Allgatherv(tmpmat[i][j],p3->mylk0[i],MPI_DOUBLE,tmp[i],recvcount,rdispls,
                     MPI_DOUBLE,p1->comm_z);    
       reshufflebackward(tmp[i],p3->nstart[xl],p3->versurf[xl]);
@@ -582,24 +585,24 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
     }
   }
  
-  free(recvcount);
-  free(rdispls);
-  free(blocktmp);
+  delete [] recvcount;
+  delete [] rdispls;
+  delete [] blocktmp;
   recvcount=NULL;
   rdispls=NULL;
   blocktmp=NULL;
 
-  for(LO i=0;i<p3->li0;i++) free(tmp[i]);
-  free(tmp);
+  for(LO i=0;i<p3->li0;i++) delete [] tmp[i];
+  delete [] tmp;
   tmp=NULL;  
 
   for(LO i=0;i<p3->li0;i++){
     for(LO j=0;j<p3->lj0;j++){
-      free(tmpmat[i][j]);
+      delete [] tmpmat[i][j];
     }
-    free(tmpmat[i]);
+    delete [] tmpmat[i];
   }
-  free(tmpmat);
+  delete [] tmpmat;
   tmpmat=NULL;
 }
 
@@ -811,12 +814,12 @@ void DatasProc3D::Prepare_mats_from_planes()
         mat_from_weight[i][j][k][3]=(chi_red_r-chi_u)/dchi*w_plane_right;  
       }
     }
-    free(tmp);
+    delete [] tmp;
   }
   for(LO i=0;i<p3->li0;i++){
-    free(p3->zcoordsurf[i]);
+    delete [] p3->zcoordsurf[i];
   }
-  free(p3->zcoordsurf);
+  delete [] p3->zcoordsurf;
 
   bool debug=false;
   if(debug){
