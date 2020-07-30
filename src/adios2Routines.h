@@ -184,7 +184,6 @@ namespace coupler {
     adios_var.SetSelection(sel);
     eng.Get(adios_var, field->data());
     eng.EndStep();
-    std::cerr << rank <<  ": receive " << name << " done \n";
     return field;
   }
   
@@ -229,7 +228,6 @@ namespace coupler {
     adios_var.SetSelection(sel);
     eng.Get(adios_var, val);
     eng.EndStep();
-    std::cerr << rank <<  ": receive " << name << " done \n";
     return val;
   } 
   

@@ -562,8 +562,6 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 	std::cout<<"num versurf[xl]="<<num<<" "<<p3->versurf[xl]<<'\n';
 	assert(num==p3->versurf[xl]);
       }     
-      std::cerr<<"rank "<< p1->mype<<" i: "<<i<<", tmp[i]: "<<tmp[i]<<", p3->mylk0[i]: "<<p3->mylk0[i]<<"\n";
-      fprintf(stderr, "rank %d, i: %d, tmp[i] %p\n", p1->mype, i, tmp[i]);
       if(p1->mype_y==p1->mype_x==0)
       MPI_Allgatherv(tmpmat[i][j],p3->mylk0[i],MPI_DOUBLE,tmp[i],recvcount,rdispls,
                     MPI_DOUBLE,p1->comm_z);    
