@@ -599,12 +599,16 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 
   for(LO i=0;i<p3->li0;i++){
     for(LO j=0;j<p3->lj0;j++){
-      delete [] tmpmat[i][j];
+      //delete [] tmpmat[i][j];
     }
   fprintf(stderr, "rank %d, 0.581\n", p1->mype);
-    delete [] tmpmat[i];
-  }
+  MPI_Barrier(MPI_COMM_WORLD);
+    //delete [] tmpmat[i];
   fprintf(stderr, "rank %d, 0.582\n", p1->mype);
+  MPI_Barrier(MPI_COMM_WORLD);
+  }
+  fprintf(stderr, "rank %d, 0.583\n", p1->mype);
+  MPI_Barrier(MPI_COMM_WORLD);
   delete [] tmpmat;
   tmpmat=NULL;
 }
