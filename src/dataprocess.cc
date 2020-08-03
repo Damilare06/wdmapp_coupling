@@ -590,16 +590,21 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   rdispls=NULL;
   blocktmp=NULL;
 
-  for(LO i=0;i<p3->li0;i++) delete [] tmp[i];
+  fprintf(stderr, "rank %d, 0.56\n", p1->mype);
+  //for(LO i=0;i<p3->li0;i++) delete [] tmp[i];
+  fprintf(stderr, "rank %d, 0.57\n", p1->mype);
   delete [] tmp;
+  fprintf(stderr, "rank %d, 0.58\n", p1->mype);
   tmp=NULL;  
 
   for(LO i=0;i<p3->li0;i++){
     for(LO j=0;j<p3->lj0;j++){
       delete [] tmpmat[i][j];
     }
+  fprintf(stderr, "rank %d, 0.581\n", p1->mype);
     delete [] tmpmat[i];
   }
+  fprintf(stderr, "rank %d, 0.582\n", p1->mype);
   delete [] tmpmat;
   tmpmat=NULL;
 }
