@@ -79,29 +79,23 @@ int main(int argc, char **argv){
   double* xgc_zcoords = coupler::receive_gene_exact<double>(dir,xZcoord, 0, block_count);
   int* xgc_versurf = coupler::receive_gene_exact<int>(dir,xVsurf, 0, p1pp3d.nx0);
   coupler::Array1d<int>* xgc_cce = coupler::receive_gene_pproc<int>(dir, xCce);
-  std::cerr<<rank<<" ABJ 5.0\n";
   coupler::Part3Mesh3D p3m3d(p1pp3d, numsurf, block_count, xgc_versurf, xgc_cce->data(), xgc_xcoords->data(), xgc_zcoords, preproc);
-  std::cerr<<rank<<" ABJ 5.1\n";
   const int nummode = 1;
   coupler::BoundaryDescr3D bdesc(p3m3d, p1pp3d, test_case, preproc);
-  std::cerr<<rank<<" ABJ 5.2\n";
+  std::cerr<<rank<<" ABJ 0.0\n";
 
   coupler::Part1ParalPar3D* mesh1;
   mesh1=&p1pp3d;
-  std::cerr<<rank<<" ABJ 5.3\n";
   coupler::Part3Mesh3D*     mesh3;
   mesh3=&p3m3d;
-  std::cerr<<rank<<" ABJ 5.4\n";
   coupler::DatasProc3D dp3d(mesh1, mesh3, preproc, test_case, ypar, nummode);
-  std::cerr<<rank<<" ABJ 5.5\n";
+  std::cerr<<rank<<" ABJ 0.1\n";
   coupler::destroy(q_prof);
   coupler::destroy(gene_xval);
   coupler::destroy(gene_parpar);
 
-  std::cerr<<rank<<" ABJ 5.6\n";
   dp3d.InitFourierPlan3D();
 
-  std::cerr<<rank<<" ABJ 5.7\n";
 
   int m;
   double realsum;
@@ -116,27 +110,21 @@ int main(int argc, char **argv){
       coupler::GO count[2]={coupler::GO(p1pp3d.lj0), p1pp3d.blockcount};
       std::cout<<"mype, start count"<<p1pp3d.mype<<" "<<start[0]<<" "<<start[1]<<" "<<count[0]<<" "<<count[1]<<'\n';
       m=i*RK_count+j;
-      std::cerr<<p1pp3d.mype<<" ABJ 0.0\n";
       coupler::Array2d<coupler::CV>* densityfromGENE = coupler::receive_density(dir, gDens,start,count,MPI_COMM_WORLD,m);
-      std::cerr<<p1pp3d.mype<<" ABJ 0.2\n";
       MPI_Barrier(MPI_COMM_WORLD);
 
-      std::cerr<<p1pp3d.mype<<" ABJ 0.3\n";
       dp3d.DistriDensiRecvfromPart1(densityfromGENE);
-      std::cerr<<p1pp3d.mype<<" ABJ 0.4\n";
       cplxsum=coupler::CV(0.0,0.0);
       MPI_Barrier(MPI_COMM_WORLD);
       coupler::printSumm3D(dp3d.densin,p1pp3d.li0,p1pp3d.lj0,inds3d,cplxsum,
       MPI_COMM_WORLD,"densityfromGENE",m);
 
 
-      std::cerr<<p1pp3d.mype<<" ABJ 0.5\n";
       dp3d.AssemDensiSendtoPart3(bdesc);
-      std::cerr<<p1pp3d.mype<<" ABJ 0.6\n";
       coupler::Array2d<double>* densitytoXGC = new coupler::Array2d<double>(
                                                     p3m3d.activenodes,p3m3d.lj0,p3m3d.blockcount,p3m3d.lj0, 
                                                     p3m3d.blockstart);
-      std::cerr<<p1pp3d.mype<<" ABJ 0.7\n";
+      std::cerr<<p1pp3d.mype<<" ABJ 0.3\n";
       double* densitytmp = densitytoXGC->data();
       for(int h=0;h<p3m3d.lj0*p3m3d.blockcount;h++){
         densitytmp[h] = dp3d.denssend[h]; 
@@ -147,27 +135,18 @@ int main(int argc, char **argv){
       std::cout<<"p3m3d.lj0*p3m3d.blockcount="<<p3m3d.lj0*p3m3d.blockcount<<'\n';
       if(p1pp3d.mype_y==0 && p1pp3d.mype_z==0)
      // coupler::printSumm1D(dp3d.denssend,INDS1d,realsum,p1pp3d.comm_x,"densitytoXGC",m);
-      std::cerr<<p1pp3d.mype<<" ABJ 1.0\n";
+      std::cerr<<p1pp3d.mype<<" ABJ 0.4\n";
       if(!debug){
-      std::cerr<<p1pp3d.mype<<" ABJ 1.1\n";
         coupler::send_from_coupler(adios,dir,densitytoXGC,cDens.IO,cDens.eng,cDens.name,senddensity,MPI_COMM_WORLD,m);    
-      std::cerr<<p1pp3d.mype<<" ABJ 1.2\n";
         coupler::destroy(densitytoXGC);
-      std::cerr<<p1pp3d.mype<<" ABJ 1.3\n";
       }
 
       if(!debug){
-      std::cerr<<p1pp3d.mype<<" ABJ 1.4\n";
         coupler::GO start_1[2]={0,p3m3d.blockstart+p3m3d.cce_first_node-1};
-      std::cerr<<p1pp3d.mype<<" ABJ 1.5\n";
         coupler::GO count_1[2]={coupler::GO(p3m3d.lj0),p3m3d.blockcount}; 
-      std::cerr<<p1pp3d.mype<<" ABJ 1.6\n";
         coupler::Array2d<double>* fieldfromXGC = coupler::receive_field(dir, xFld,start_1,count_1,MPI_COMM_WORLD,m);
-      std::cerr<<p1pp3d.mype<<" ABJ 1.7\n";
         dp3d.DistriPotentRecvfromPart3(fieldfromXGC);
-      std::cerr<<p1pp3d.mype<<" ABJ 1.8\n";
         coupler::destroy(fieldfromXGC);
-      std::cerr<<p1pp3d.mype<<" ABJ 1.9\n";
       }
 
       if(debug){

@@ -299,6 +299,7 @@ void DatasProc3D::AssemPotentSendtoPart1()
   LO* rdispls = new LO[p1->npz];
 
   MPI_Datatype mpitype = getMpiType(LO());      
+  if(p1->mype_y==0 && p1->mype_x==0)
   MPI_Allgather(&p1->lk0,1,mpitype,recvcount,1,mpitype,p1->comm_z); 
   rdispls[0]=0;
   for(LO i=1;i<p1->npz;i++){
@@ -321,6 +322,7 @@ void DatasProc3D::AssemPotentSendtoPart1()
       for(LO h=0;h<p1->nz0;h++){
         tmp[h]=CV({0.0,0.0});
       } 
+      if(p1->mype_y==0 && p1->mype_x==0)
       MPI_Allgatherv(potentpart1[i][j],p1->lk0,MPI_CXX_DOUBLE_COMPLEX,tmp,recvcount,rdispls,
                     MPI_CXX_DOUBLE_COMPLEX,p1->comm_z);    
       for(LO m=0;m<p1->nz0;m++){
@@ -532,7 +534,6 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
     tmp[i]=new double[p3->versurf[p3->li1+i]];
   }
 
-  fprintf(stderr, "rank %d, 0.530\n", p1->mype);
   GO sumbegin;
   LO xl;
   LO num;
@@ -584,7 +585,6 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
         assert((sumbegin+(GO)p3->versurf[xl]) == p3->blockcount);
       }
     }   
-  fprintf(stderr, "rank %d, 0.540\n", p1->mype);
     for(GO h=0;h<p3->blockcount;h++){
         denssend[j*p3->blockcount+h] = blocktmp[h]*p1->norm_fact_dens;
     }
@@ -610,13 +610,10 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
       //delete [] tmpmat[i][j];
     }
     fprintf(stderr, "rank %d, 0.581\n", p1->mype);
-    MPI_Barrier(MPI_COMM_WORLD);
     //delete [] tmpmat[i];
     fprintf(stderr, "rank %d, 0.582\n", p1->mype);
-    MPI_Barrier(MPI_COMM_WORLD);
   }
   fprintf(stderr, "rank %d, 0.583\n", p1->mype);
-  MPI_Barrier(MPI_COMM_WORLD);
   delete [] tmpmat;
   tmpmat=NULL;
 }
