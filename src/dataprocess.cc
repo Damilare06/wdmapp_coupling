@@ -299,7 +299,6 @@ void DatasProc3D::AssemPotentSendtoPart1()
   LO* rdispls = new LO[p1->npz];
 
   MPI_Datatype mpitype = getMpiType(LO());      
-  if(p1->mype_y==0 && p1->mype_x==0)
   MPI_Allgather(&p1->lk0,1,mpitype,recvcount,1,mpitype,p1->comm_z); 
   rdispls[0]=0;
   for(LO i=1;i<p1->npz;i++){
@@ -322,7 +321,6 @@ void DatasProc3D::AssemPotentSendtoPart1()
       for(LO h=0;h<p1->nz0;h++){
         tmp[h]=CV({0.0,0.0});
       } 
-      if(p1->mype_y==0 && p1->mype_x==0)
       MPI_Allgatherv(potentpart1[i][j],p1->lk0,MPI_CXX_DOUBLE_COMPLEX,tmp,recvcount,rdispls,
                     MPI_CXX_DOUBLE_COMPLEX,p1->comm_z);    
       for(LO m=0;m<p1->nz0;m++){
@@ -549,7 +547,6 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
         recvcount[h]=0;
         rdispls[h]=0;
       }
-      if(p1->mype_y==0 && p1->mype_x==0)
       MPI_Allgather(&p3->mylk0[i],1,mpitype,recvcount,1,mpitype,p1->comm_z); 
       rdispls[0]=0;
       for(LO k=1;k<p1->npz;k++){
@@ -567,11 +564,11 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 	std::cout<<"num versurf[xl]="<<num<<" "<<p3->versurf[xl]<<'\n';
 	assert(num==p3->versurf[xl]);
       }     
-      if(p1->mype_y==0 && p1->mype_x==0){
+      //if(p1->mype_y==0 && p1->mype_x==0){
         fprintf(stderr, "p1->mype_z: %d, tmp[i]: %d, recvcount: %d, rdispls: %d\n",p1->mype_z, p3->versurf[p3->li1+i], recvcount[p1->mype_z],rdispls[p1->mype_z]);
         MPI_Allgatherv(tmpmat[i][j],p3->mylk0[i],MPI_DOUBLE,tmp[i],recvcount,rdispls,
                     MPI_DOUBLE,p1->comm_z);    
-      }
+      //}
       reshufflebackward(tmp[i],p3->nstart[xl],p3->versurf[xl]);
 
       sumbegin=0;
