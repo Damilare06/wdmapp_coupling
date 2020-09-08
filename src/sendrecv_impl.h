@@ -13,6 +13,7 @@ namespace {
 //TODO I think there is a cleaner way - ask Gerrett
 template<class T>
 MPI_Datatype getMpiType(T foo) {
+  PERFSTUBS_START_STRING(__func__);
   MPI_Datatype mpitype;
   //determine the type based on what is being sent
   if( std::is_same<T, double>::value ) {
@@ -40,6 +41,7 @@ template<class T>
 void mpisendrecv_aux2D(MPI_Comm comm,LO nzb,LO lx,LO ly,LO lz,
      T*** lowbuf,T*** upbuf,T*** box)
 {
+  PERFSTUBS_START_STRING(__func__);
       MPI_Datatype mpitype = getMpiType(T());
       T* sendbuf=new T[lx*ly*nzb];
       T* recvbuf=new T[lx*ly*nzb];
@@ -79,12 +81,14 @@ void mpisendrecv_aux2D(MPI_Comm comm,LO nzb,LO lx,LO ly,LO lz,
       }
   delete[] sendbuf;
   delete[] recvbuf;
+  PERFSTUBS_STOP_STRING(__func__);
 }
 
 template<class T>
 void mpisendrecv_aux1D(MPI_Comm comm,LO nzb,LO xind,LO yind,LO zind,
      T* lowbuf,T* upbuf,T* box1d)
 {
+  PERFSTUBS_START_STRING(__func__);
 
       MPI_Datatype mpitype = getMpiType(T());
       MPI_Status status;
@@ -95,6 +99,7 @@ void mpisendrecv_aux1D(MPI_Comm comm,LO nzb,LO xind,LO yind,LO zind,
       MPI_Cart_shift(comm,0,-1,&rank_source,&rank_dest);
       MPI_Sendrecv(&box1d[zind-nzb],nzb,mpitype,rank_dest,102,lowbuf,nzb,mpitype,rank_source,102,
             comm,&status);
+  PERFSTUBS_STOP_STRING(__func__);
 }
 
 }

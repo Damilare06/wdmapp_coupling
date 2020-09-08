@@ -476,6 +476,8 @@ void DatasProc3D::oldAssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 {
   PERFSTUBS_START_STRING(__func__);
+  fprintf(stderr, "setup 1\n");
+  fprintf(stderr, "rank: %d ,p3->li0: %d, p3->lj0: %d p3->mylk0[0]: %d, p3->mylk0[2]: %d\n",p1->mype, p3->li0,p3->lj0,p3->mylk0[0],p3->mylk0[2]);
   double*** tmpmat = new double**[p3->li0];
     for(LO i=0;i<p3->li0;i++){
       tmpmat[i]=new double*[p3->lj0];
@@ -501,6 +503,10 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 
 // don't understand the following operation  
   
+  fprintf(stderr, "setup 2\n");
+  fprintf(stderr, "rank: %d ,p1->li0: %d, p1->lj0: %d n_cuts: %d\n",p1->mype, p1->li0,p1->lj0,p1->n_cuts);
+  fprintf(stderr, "rank: %d ,p1->npz: %d, p3->blockcount: %d p3->versurf[0]: %d, p3->versurf[1]: %d\n",p1->mype, p1->npz,p3->blockcount, p3->versurf[0], p3->versurf[1]);
+  PERFSTUBS_TIMER_START(_timer, "exchange");
   CV*** loc_data=new CV**[p1->li0];
   for(LO i=0;i<p1->li0;i++){
     loc_data[i]=new CV*[p3->lj0];
@@ -546,11 +552,13 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   for(LO i=0;i<p3->li0;i++){
     tmp[i]=new double[p3->versurf[p3->li1+i]];
   }
+  PERFSTUBS_TIMER_STOP(_timer);
 
   GO sumbegin;
   LO xl;
   LO num;
 
+  PERFSTUBS_TIMER_START(_timer, "exchange");
   for(LO j=0;j<p3->lj0;j++){
     xl=0;
     for(GO h=0;h<p3->blockcount;h++){
@@ -599,7 +607,9 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
         denssend[j*p3->blockcount+h] = blocktmp[h]*p1->norm_fact_dens;
     }
   }
+  PERFSTUBS_TIMER_STOP(_timer);
  
+  PERFSTUBS_TIMER_START(_timer, "cleanup");
   free(recvcount);
   free(rdispls);
   free(blocktmp);
@@ -619,6 +629,7 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   }
   free(tmpmat);
   tmpmat=NULL;
+  PERFSTUBS_TIMER_STOP(_timer);
   PERFSTUBS_STOP_STRING(__func__);
 }
 
