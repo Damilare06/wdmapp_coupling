@@ -30,6 +30,7 @@ MPI_Datatype getMpiType(T foo) {
     fprintf(stderr, "Unknown type in %s... exiting\n", __func__);
     exit(EXIT_FAILURE);
   }
+  PERFSTUBS_STOP_STRING(__func__);
   return mpitype;
 }
 
