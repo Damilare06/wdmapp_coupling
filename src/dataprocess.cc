@@ -33,7 +33,7 @@ DatasProc3D::DatasProc3D(const Part1ParalPar3D* p1pp3d,
 
 void DatasProc3D::init()
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   if(preproc==true){
     if(yparal==true){
       if(p1->li0%p1->npy==0){
@@ -60,12 +60,11 @@ void DatasProc3D::init()
   sum=0;
   for(LO i=0;i<p3->li0;i++)  sum+=p3->mylk0[i];
  
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 void DatasProc3D::AllocDensityArrays()
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   if(yparal==false){
     densin=new CV**[p1->li0];
     for(LO i=0;i<p1->li0;i++){
@@ -101,13 +100,12 @@ void DatasProc3D::AllocDensityArrays()
    denssend = new double[p3->blockcount*p3->lj0];
    
  } 
- PERFSTUBS_STOP_STRING(__func__);
 }
 
 
 void DatasProc3D::AllocPotentArrays()
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   if(yparal==false){
     potentin=new double**[p3->li0];
     for(LO i=0;i<p3->li0;i++){
@@ -137,12 +135,11 @@ void DatasProc3D::AllocPotentArrays()
    potentsend = new CV[p1->blockcount*p1->lj0];
   
   }
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 void DatasProc3D::AllocMatXYZtoPlane()
 {
-   PERFSTUBS_START_STRING(__func__);
+   PERFSTUBS_SCOPED_TIMER(__func__);
    mattoplane=new double***[p3->li0];
    for(LO i=0;i<p3->li0;i++){
      mattoplane[i] = new double**[p1->n_cuts];
@@ -183,12 +180,11 @@ void DatasProc3D::AllocMatXYZtoPlane()
       }
     }
   }
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 void DatasProc3D::DistriPotentRecvfromPart3(const Array2d<double>* fieldfromXGC)
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   double** tmp;
   tmp = new double*[p3->lj0];
   for(LO j=0;j<p3->lj0;j++){
@@ -256,7 +252,6 @@ void DatasProc3D::DistriPotentRecvfromPart3(const Array2d<double>* fieldfromXGC)
     free(tmp[j]);
   free(tmp);
   tmp=NULL;
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 
@@ -264,7 +259,7 @@ void DatasProc3D::DistriPotentRecvfromPart3(const Array2d<double>* fieldfromXGC)
 //Distribute the sub global potential  2d array received from part3 and reorder the sub 2darray.  
 void DatasProc3D::oldDistriPotentRecvfromPart3(const Array2d<double>* fieldfromXGC)
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   double** tmp;
   tmp = new double*[p3->lj0];
   for(LO j=0;j<p3->lj0;j++){
@@ -300,14 +295,13 @@ void DatasProc3D::oldDistriPotentRecvfromPart3(const Array2d<double>* fieldfromX
   for(LO j=0;j<p3->lj0;j++)
     free(tmp[j]);
   free(tmp);
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 // Assemble the potential sub2d array in each process into a bigger one, which is straightforwardly transferred by
 // the adios2 API from coupler to Part1.
 void DatasProc3D::AssemPotentSendtoPart1()
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   LO* recvcount = new LO[p1->npz];
   LO* rdispls = new LO[p1->npz];
 
@@ -351,13 +345,12 @@ void DatasProc3D::AssemPotentSendtoPart1()
   tmp=NULL;
   recvcount=NULL;
   rdispls=NULL;
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 ////Distribute the subglobal density  2d array received from part1 to the processes.
 void DatasProc3D::DistriDensiRecvfromPart1(const Array2d<CV>* densityfromGENE)
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   CV** tmp; 
   tmp = new CV*[p1->lj0];
   for(LO j=0;j<p1->lj0; j++){
@@ -403,14 +396,13 @@ void DatasProc3D::DistriDensiRecvfromPart1(const Array2d<CV>* densityfromGENE)
    }  
    free(tmp);
    tmp=NULL;
-   PERFSTUBS_STOP_STRING(__func__);
 }
 
 // Assemble the density sub2d array in each process into a global one, which is straightforwardly transferred by
 // the adios2 API from coupler to Part3.
 void DatasProc3D::oldAssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   zDensityBoundaryBufAssign(densin,bdesc);
   InterpoDensity3D(bdesc);
   CmplxdataToRealdata3D();
@@ -468,15 +460,15 @@ void DatasProc3D::oldAssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   free(recvcount);
   free(rdispls);
   free(blocktmp);
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 // Assemble the density sub2d array in each process into a global one, which is straightforwardly transferred by
 // the adios2 API from coupler to Part3.
 void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 {
-  PERFSTUBS_START_STRING(__func__);
-  double starttime, endtime;
+  PERFSTUBS_SCOPED_TIMER(__func__);
+  double starttime, endtime,  starttime_asm, endtime_asm;
+  starttime_asm = MPI_Wtime(); 
   //fprintf(stderr, "setup 1\n");
   //fprintf(stderr, "rank: %d ,p3->li0: %d, p3->lj0: %d p3->mylk0[0]: %d, p3->mylk0[2]: %d\n",p1->mype, p3->li0,p3->lj0,p3->mylk0[0],p3->mylk0[2]);
   starttime = MPI_Wtime(); 
@@ -637,13 +629,15 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   tmpmat=NULL;
   endtime = MPI_Wtime();
   fprintf(stderr,"rank %d cleanup took %f seconds\n",p1->mype, endtime-starttime);
-  PERFSTUBS_STOP_STRING(__func__);
+  endtime_asm = MPI_Wtime();
+  fprintf(stderr,"rank %d AssemDens took %f seconds\n", p1->mype, endtime_asm-starttime_asm);
+  
 }
 
 //I dont's understand the function of the following matrix.
 void DatasProc3D::oldInitmattoplane()
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   double y_cut;
   LO tmp_ind;
   LO ind_l_tmp;
@@ -663,13 +657,12 @@ void DatasProc3D::oldInitmattoplane()
       }
     }
   }
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 
 void DatasProc3D::Initmattoplane()
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   for(LO i=0;i<p3->li0;i++){
     for(LO o=0;o<p1->n_cuts;o++){
       for(LO j=0;j<p1->lj0;j++){
@@ -701,14 +694,13 @@ void DatasProc3D::Initmattoplane()
   std::cout<<"sum of mat_to_plane, mype_x="<<p1->mype_x<<" "<<sum<<'\n';
 }
 
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 
 //The function of this routines is not clear so far.
 void DatasProc3D::DensityToPart3()
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   for(LO i=0;i<p3->li0;i++){
     for(LO k=0;k<p3->mylk0[i];k++){
       for(LO j=0;j<p3->lj0;j++){
@@ -720,13 +712,12 @@ void DatasProc3D::DensityToPart3()
       }
     }
   }
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 // not very clear about the function of this routine
 void DatasProc3D::Prepare_mats_from_planes()
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   double dphi=2.0*cplPI/double(p1->n0_global*p1->n_cuts);
   double* phi_l=new double[p1->n_cuts];
   for(int i=0;i<p1->n_cuts;i++){
@@ -885,12 +876,11 @@ void DatasProc3D::Prepare_mats_from_planes()
 
   }
   
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 void DatasProc3D::TestInitPotentAlongz(const Part3Mesh3D* p3m3d,const LO npy, const LO n) 
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   if(npy==1){
     LO li0,lj0,lk0;
     li0=p3->li0;
@@ -913,12 +903,11 @@ void DatasProc3D::TestInitPotentAlongz(const Part3Mesh3D* p3m3d,const LO npy, co
       }
     }
   }
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 DatasProc3D::~DatasProc3D()
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   FreeFourierPlan3D();
   if(densrecv!=NULL){
     for(LO i=0;i<p1->li0;i++){
@@ -935,7 +924,6 @@ DatasProc3D::~DatasProc3D()
   if(potentouttmp!=NULL) delete[] potentouttmp;
   if(potentinterpo!=NULL) delete[] potentinterpo;
   if(potentpart1!=NULL) delete[] potentpart1;       
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 

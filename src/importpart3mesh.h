@@ -124,7 +124,7 @@ LO  minloc(const double* zcoords, const LO n);
 template<class T>
 void reshuffleforward(T* array,const LO nstart,const LO vertnum)
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   T* tmp=new T[vertnum];
   for(LO i=0;i<vertnum-nstart;i++)
     tmp[i]=array[nstart+i];
@@ -133,14 +133,13 @@ void reshuffleforward(T* array,const LO nstart,const LO vertnum)
   for(LO k=0;k<vertnum;k++)
     array[k]=tmp[k];
   delete[] tmp;
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 
 template<class T>
 void reshufflebackward(T* array,const LO nstart,const LO vertnum)
 {
-  PERFSTUBS_START_STRING(__func__);
+  PERFSTUBS_SCOPED_TIMER(__func__);
   T* tmp=new T[vertnum];
   for(LO i=vertnum-nstart;i<vertnum;i++)
     tmp[i-vertnum+nstart]=array[i];
@@ -149,7 +148,6 @@ void reshufflebackward(T* array,const LO nstart,const LO vertnum)
   for(LO k=0;k<vertnum;k++)
     array[k]=tmp[k];
   delete[] tmp;
-  PERFSTUBS_STOP_STRING(__func__);
 }
 
 double minimalvalue(const double* array, const LO n);
