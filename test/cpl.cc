@@ -22,6 +22,7 @@ int main(int argc, char **argv){
   PERFSTUBS_INITIALIZE();
 
   int rank;
+  double starttime, endtime;
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -60,6 +61,7 @@ int main(int argc, char **argv){
   coupler::adios2_handler xVsurf(adios,"xgc_versurfs");
   coupler::adios2_handler xCce(adios,"xgc_cce_data");
 
+  starttime = MPI_Wtime();
   //receive GENE's preproc mesh discretization values
   coupler::Array1d<double>* q_prof = coupler::receive_gene_pproc<double>(dir, gQP);
   coupler::Array1d<double>* gene_xval = coupler::receive_gene_pproc<double>(dir, gRX);//matching gene's xval arr
@@ -200,6 +202,8 @@ int main(int argc, char **argv){
   std::cerr << p1pp3d.mype << " before kokkos finalize\n";
   Kokkos::finalize();
   std::cerr << p1pp3d.mype << " done kokkos finalize\n";
+  endtime = MPI_Wtime();
+  fprintf(stderr,"rank %d Total simulation took %f seconds\n", rank, endtime-starttime);
   MPI_Finalize();
   std::cout<<"MPI is finalized."<<'\n';
   PERFSTUBS_DUMP_DATA();
