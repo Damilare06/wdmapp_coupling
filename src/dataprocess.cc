@@ -464,15 +464,10 @@ void DatasProc3D::oldAssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 
 // Assemble the density sub2d array in each process into a global one, which is straightforwardly transferred by
 // the adios2 API from coupler to Part3.
-void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
+void DatasProc3D::InitAssemDensiSendtoPart3()
 {
-  PERFSTUBS_SCOPED_TIMER(__func__);
-  double starttime, endtime,  starttime_asm, endtime_asm;
-  starttime_asm = MPI_Wtime(); 
-  //fprintf(stderr, "setup 1\n");
-  //fprintf(stderr, "rank: %d ,p3->li0: %d, p3->lj0: %d p3->mylk0[0]: %d, p3->mylk0[2]: %d\n",p1->mype, p3->li0,p3->lj0,p3->mylk0[0],p3->mylk0[2]);
-  starttime = MPI_Wtime(); 
-  double*** tmpmat = new double**[p3->li0];
+
+  tmpmat = new double**[p3->li0];
     for(LO i=0;i<p3->li0;i++){
       tmpmat[i]=new double*[p3->lj0];
       for(LO j=0;j<p3->lj0;j++){
@@ -482,6 +477,38 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
         }
       }
     }
+
+  loc_data=new CV**[p1->li0];
+  for(LO i=0;i<p1->li0;i++){
+    loc_data[i]=new CV*[p3->lj0];
+    for(LO j=0;j<p3->lj0;j++) loc_data[i][j]=new CV[p3->mylk0[i]];
+  }
+
+  tmp=new double*[p3->li0];
+  for(LO i=0;i<p3->li0;i++){
+    tmp[i]=new double[p3->versurf[p3->li1+i]];
+  }
+}
+// Assemble the density sub2d array in each process into a global one, which is straightforwardly transferred by
+// the adios2 API from coupler to Part3.
+void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
+{
+  PERFSTUBS_SCOPED_TIMER(__func__);
+  double starttime, endtime,  starttime_asm, endtime_asm;
+  starttime_asm = MPI_Wtime(); 
+  //fprintf(stderr, "setup 1\n");
+  //fprintf(stderr, "rank: %d ,p3->li0: %d, p3->lj0: %d p3->mylk0[0]: %d, p3->mylk0[2]: %d\n",p1->mype, p3->li0,p3->lj0,p3->mylk0[0],p3->mylk0[2]);
+  starttime = MPI_Wtime(); 
+  //double*** tmpmat = new double**[p3->li0];
+  //  for(LO i=0;i<p3->li0;i++){
+  //    tmpmat[i]=new double*[p3->lj0];
+  //    for(LO j=0;j<p3->lj0;j++){
+  //      tmpmat[i][j]=new double[p3->mylk0[i]];
+  //      for(LO k=0;k<p3->mylk0[i];k++){
+  //        tmpmat[i][j][k]=0.0;
+  //      }
+  //    }
+  //  }
   endtime = MPI_Wtime();
   fprintf(stderr,"rank %d setup1 took %f seconds\n", p1->mype, endtime-starttime);
 
@@ -499,15 +526,16 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 
 // don't understand the following operation  
   
-  //fprintf(stderr, "setup 2\n");
-  //fprintf(stderr, "rank: %d ,p1->li0: %d, p1->lj0: %d n_cuts: %d\n",p1->mype, p1->li0,p1->lj0,p1->n_cuts);
-  //fprintf(stderr, "rank: %d ,p1->npz: %d, p3->blockcount: %d p3->versurf[0]: %d, p3->versurf[1]: %d\n",p1->mype, p1->npz,p3->blockcount, p3->versurf[0], p3->versurf[1]);
+  MPI_Barrier(MPI_COMM_WORLD);
+  fprintf(stderr, "setup 2\n");
+  fprintf(stderr, "rank: %d ,p1->li0: %d, p1->lj0: %d n_cuts: %d\n",p1->mype, p1->li0,p1->lj0,p1->n_cuts);
+  fprintf(stderr, "rank: %d ,p1->npz: %d, p3->blockcount: %d p3->versurf[0]: %d, p3->versurf[1]: %d\n",p1->mype, p1->npz,p3->blockcount, p3->versurf[0], p3->versurf[1]);
   starttime = MPI_Wtime(); 
-  CV*** loc_data=new CV**[p1->li0];
-  for(LO i=0;i<p1->li0;i++){
-    loc_data[i]=new CV*[p3->lj0];
-    for(LO j=0;j<p3->lj0;j++) loc_data[i][j]=new CV[p3->mylk0[i]];
-  }
+  //CV*** loc_data=new CV**[p1->li0];
+  //for(LO i=0;i<p1->li0;i++){
+  //  loc_data[i]=new CV*[p3->lj0];
+  //  for(LO j=0;j<p3->lj0;j++) loc_data[i][j]=new CV[p3->mylk0[i]];
+  //}
   CV tmp1;
 
   for(LO i=0;i<p1->li0;i++){
@@ -532,11 +560,11 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
     }     
   }
 
-  for(LO i=0;i<p1->li0;i++){
-    for(LO j=0;j<p3->lj0;j++) free(loc_data[i][j]);
-    free(loc_data[i]);
-  }
-  free(loc_data);
+  //for(LO i=0;i<p1->li0;i++){
+  //  for(LO j=0;j<p3->lj0;j++) free(loc_data[i][j]);
+  //  free(loc_data[i]);
+  //}
+  //free(loc_data);
 
 //don't understand the above operation   
 
@@ -544,10 +572,10 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   LO* rdispls = new LO[p1->npz];
   double* blocktmp = new double[p3->blockcount];
 
-  double** tmp=new double*[p3->li0];
-  for(LO i=0;i<p3->li0;i++){
-    tmp[i]=new double[p3->versurf[p3->li1+i]];
-  }
+  //double** tmp=new double*[p3->li0];
+  //for(LO i=0;i<p3->li0;i++){
+  //  tmp[i]=new double[p3->versurf[p3->li1+i]];
+  //}
   endtime = MPI_Wtime();
   fprintf(stderr,"rank %d setup2 took %f seconds\n",p1->mype, endtime-starttime);
 
@@ -615,22 +643,22 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   rdispls=NULL;
   blocktmp=NULL;
 
-  for(LO i=0;i<p3->li0;i++) free(tmp[i]);
-  free(tmp);
-  tmp=NULL;  
+  //for(LO i=0;i<p3->li0;i++) free(tmp[i]);
+  //free(tmp);
+  //tmp=NULL;  
 
-  for(LO i=0;i<p3->li0;i++){
-    for(LO j=0;j<p3->lj0;j++){
-      free(tmpmat[i][j]);
-    }
-    free(tmpmat[i]);
-  }
-  free(tmpmat);
-  tmpmat=NULL;
+  //for(LO i=0;i<p3->li0;i++){
+  //  for(LO j=0;j<p3->lj0;j++){
+  //    free(tmpmat[i][j]);
+  //  }
+  //  free(tmpmat[i]);
+  //}
+  //free(tmpmat);
+  //tmpmat=NULL;
   endtime = MPI_Wtime();
-  fprintf(stderr,"rank %d cleanup took %f seconds\n",p1->mype, endtime-starttime);
-  endtime_asm = MPI_Wtime();
-  fprintf(stderr,"rank %d AssemDens took %f seconds\n", p1->mype, endtime_asm-starttime_asm);
+  //fprintf(stderr,"rank %d cleanup took %f seconds\n",p1->mype, endtime-starttime);
+  //endtime_asm = MPI_Wtime();
+  //fprintf(stderr,"rank %d AssemDens took %f seconds\n", p1->mype, endtime_asm-starttime_asm);
   
 }
 

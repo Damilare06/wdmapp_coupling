@@ -95,6 +95,8 @@ int main(int argc, char **argv){
   coupler::Part3Mesh3D*     mesh3;
   mesh3=&p3m3d;
   coupler::DatasProc3D dp3d(mesh1, mesh3, preproc, test_case, ypar, nummode);
+  dp3d.InitAssemDensiSendtoPart3();
+
   if(!p1pp3d.mype)std::cerr << "0.9"<< "\n";
   coupler::destroy(q_prof);
   coupler::destroy(gene_xval);
@@ -185,6 +187,7 @@ int main(int argc, char **argv){
     }
   }
 
+  dp3d.FreeAssemDensiSendtoPart3();
   gDens.close();
   cDens.close();
   xFld.close();

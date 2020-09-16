@@ -74,6 +74,11 @@ public:
   // The following parameters for yparal=true;
   LO myli0;
 
+// Added to optimize AssemDens routine
+  double** tmp = NULL; 
+  double*** tmpmat = NULL; 
+  CV*** loc_data = NULL;
+
 
   /* constructor
    * optional argument supports setting
@@ -97,6 +102,8 @@ public:
   void Initmattoplane();
 
   void oldAssemDensiSendtoPart3(BoundaryDescr3D& bdesc);
+  void InitAssemDensiSendtoPart3(); 
+  void FreeAssemDensiSendtoPart3(); 
   void AssemDensiSendtoPart3(BoundaryDescr3D& bdesc); 
   void DistriDensiRecvfromPart1(const Array2d<CV>* densityfromGENE);
   void AssemPotentSendtoPart1();
