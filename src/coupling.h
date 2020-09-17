@@ -10,8 +10,22 @@
 #include <fftw3.h>
 
 #include "couplingConstants.h"
+#include "couplingTypes.h"
 
 namespace coupler {
+
+  struct adios2_handler{
+    adios2::IO IO;
+    adios2::Engine eng;
+    std::string name;
+    adios2_handler(adios2::ADIOS &adios, const std::string name_):
+            name(name_),IO(adios.DeclareIO(name_))  {}
+    void close() {
+      assert(eng);
+      eng.Close();
+    }
+    std::string get_name() const { return name; };
+  };
 
   class Part1ParalPar3D;
 
@@ -19,19 +33,6 @@ namespace coupler {
 
   
 
-  /** GO = global ordinate to count/number
-   *  quantities over the entire domain
-   */
-  typedef long unsigned GO;
-
-  /** LO = local ordinate to count/number
-   *  quantities over a sub-domain
-   */
-  typedef unsigned LO;
-
-  /** Storage of double precision 2D array data
-   *  and associated meta data
-   */
   template<class T> 
   class Array2d {
     public:
@@ -251,10 +252,11 @@ namespace coupler {
   void send2d_from_C(const Array2d<T>* a2d, const std::string dir,
       const std::string name, adios2::IO &coupling_io,
       adios2::Engine &engine, adios2::Variable<T> &send_id) {
+
     const::adios2::Dims g_dims({a2d->globalW(), a2d->globalH()});
-    const::adios2::Dims g_offset({a2d->start_col(), 0});
+    const::adios2::Dims g_offset({0, 0});
     assert(a2d->localH() == a2d->globalH());
-    const::adios2::Dims l_dims({a2d->localW(), a2d->globalH()});
+    const::adios2::Dims l_dims({a2d->globalW(), a2d->globalH()});
   
     const std::string fname = dir + "/" + name + ".bp";
     if (!engine){
@@ -275,9 +277,9 @@ namespace coupler {
   /** Receive PreProc values from GENE
    */
   template<typename T>
-  Array1d<T>* receive_gene_pproc(const std::string cce_folder,
+  Array1d<T>* receive_gem_pproc(const std::string cce_folder,
       adios2::IO &io, adios2::Engine &engine) {
-    const std::string name = "gene_pproc";
+    const std::string name = "gem_pproc";
     return receive1d_from_ftn<T>(cce_folder,name, io, engine);
   }
   
@@ -291,8 +293,8 @@ namespace coupler {
   Array2d<double>* receive_field(const std::string cce_folder,
       adios2::IO &io, adios2::Engine &eng);
 
-  void send_field(const std::string cce_folder, const Array2d<double>* field,
-      adios2::IO &io, adios2::Engine &engine, adios2::Variable<double> &send_id); 
+  void send_field(const std::string cce_folder, const Array2d<CV>* field,
+      adios2::IO &io, adios2::Engine &engine, adios2::Variable<CV> &send_id); 
 
   /** Close the Adios2 engine objects
    */

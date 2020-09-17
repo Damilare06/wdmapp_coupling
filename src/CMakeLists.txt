@@ -2,7 +2,9 @@ set(SOURCES
             coupling.cc
             commpart1.cc)
 
-set(HEADERS coupling.h couplingConstants.h)
+set(HEADERS coupling.h 
+            couplingConstants.h
+            couplingTypes.h)
 
 add_library(coupler ${SOURCES})
 set_target_properties(coupler PROPERTIES PUBLIC_HEADER "${HEADERS}")

@@ -1,4 +1,5 @@
 #include "coupling.h"
+#include "couplingTypes.h"
 
 void exParFor() {
   Kokkos::parallel_for(
@@ -20,40 +21,44 @@ int main(int argc, char **argv){
   }
 
   adios2::ADIOS adios(MPI_COMM_WORLD, adios2::DebugON);
-  adios2::IO IO[6];
-  adios2::Engine eng[6];
-  adios2::Variable<double> send_var[2];
   const std::string dir = "../coupling";
   const int time_step = 1, RK_count = 4;
 
-  IO[0] = adios.DeclareIO("gene_pproc");
-  IO[1] = adios.DeclareIO("xgc_pproc");
-  IO[2] = adios.DeclareIO("gene_density");
-  IO[3] = adios.DeclareIO("cpl_density");
-  IO[4] = adios.DeclareIO("xgc_field");
-  IO[5] = adios.DeclareIO("cpl_field");
+  adios2::Variable<double> senddensity;
+  adios2::Variable<coupler::CV> sendfield;
+
+  coupler::adios2_handler gDens(adios,"gem_density");
+  coupler::adios2_handler cDens(adios,"cpl_density");
+  coupler::adios2_handler xFld(adios,"xgc_field");
+  coupler::adios2_handler cFld(adios,"cpl_field");
+  coupler::adios2_handler gCy(adios,"gem_cy_array");
 
   //receive GENE's preproc mesh discretization values
-  coupler::Array1d<int>* gene_pproc = coupler::receive_gene_pproc<int>(dir, IO[0], eng[0]);
+  coupler::Array1d<int>* gem_pproc = coupler::receive_gem_pproc<int>(dir, gCy.IO, gCy.eng);
   //coupler::Array1d*<double> xgc_pproc = coupler::receive_xgc_pproc(dir, IO[1], eng[1]);
 
   //Perform coupling routines
-  coupler::destroy(gene_pproc);
+  coupler::destroy(gem_pproc);
 
   for (int i = 0; i < time_step; i++) {
     for (int j = 0; j < RK_count; j++) {
-      coupler::Array2d<double>* density = coupler::receive_density(dir, IO[2], eng[2]);
+      coupler::Array2d<double>* density = coupler::receive_density(dir, gDens.IO, gDens.eng);
       coupler::printSomeDensityVals(density);
-      coupler::send_density(dir, density, IO[3], eng[3], send_var[0]);
+      coupler::send_density(dir, density, cDens.IO, cDens.eng, senddensity);
       coupler::destroy(density);
 
-      coupler::Array2d<double>* field = coupler::receive_field(dir, IO[4], eng[4]);
-      coupler::send_field(dir, field, IO[5], eng[5], send_var[1]);
+      coupler::Array2d<double>* field = coupler::receive_field(dir, xFld.IO, xFld.eng);
+      coupler::Array2d<coupler::CV>* field_CV = new coupler::Array2d<coupler::CV>(10,10,10,10,10);
+      coupler::send_field(dir, field_CV, cFld.IO, cFld.eng, sendfield);
       coupler::destroy(field);
     }
   }
 
-  coupler::close_engines(eng, 6);
+  gDens.close();
+  cDens.close();
+  xFld.close();
+  cFld.close();
+
   Kokkos::finalize();
   MPI_Finalize();
   return 0;
