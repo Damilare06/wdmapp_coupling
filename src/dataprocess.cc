@@ -544,12 +544,13 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 
   CV tmp1;
 
-  std::copy(&densinterpo[0][0][0], &densinterpo[0][0][0]+(p1->li0)*(p1->lj0)*(p3->mylk0[p1->li0]), &loc_data[0][0][0]);
+  //std::copy(&densinterpo[0][0][0], &densinterpo[0][0][0]+(p1->li0)*(p1->lj0)*(p3->mylk0[p1->li0]), &loc_data[0][0][0]);
   for(LO i=0;i<p1->li0;i++){
     for(LO j=0;j<p1->lj0;j++){
-      //for(LO k=0;k<p3->mylk0[i];k++){
-      //  loc_data[i][j][k]= densinterpo[i][j][k];  //FIXME: Here pointer is better      
-      //}
+      *loc_data[i][j]=*densinterpo[i][j];
+    //  for(LO k=0;k<p3->mylk0[i];k++){
+    //    loc_data[i][j][k]= densinterpo[i][j][k];  //FIXME: Here pointer is better      
+    //  }
       if(j>0){
         for(LO k=0;k<p3->mylk0[i];k++){
           loc_data[i][p3->lj0-j][k]=std::conj(densinterpo[i][j][k]);
