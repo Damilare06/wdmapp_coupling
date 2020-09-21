@@ -543,11 +543,14 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   //fprintf(stderr, "rank: %d ,p1->npz: %d, p3->blockcount: %d p3->versurf[0]: %d, p3->versurf[1]: %d\n",p1->mype, p1->npz,p3->blockcount, p3->versurf[0], p3->versurf[1]);
 
   CV tmp1;
-
-  //std::copy(&densinterpo[0][0][0], &densinterpo[0][0][0]+(p1->li0)*(p1->lj0)*(p3->mylk0[p1->li0]), &loc_data[0][0][0]);
+  MPI_Barrier(MPI_COMM_WORLD);
+  std::copy(&densinterpo[0][0][0], &densinterpo[0][0][0]+(p1->li0)*(p1->lj0)*(p3->mylk0[p1->li0-1]), &loc_data[0][0][0]);
+  MPI_Barrier(MPI_COMM_WORLD);
+  fprintf(stderr, "Past setup 1\n");
   for(LO i=0;i<p1->li0;i++){
+   //**loc_data[i]=**densinterpo[i];  //attempt 2 with minimal improvements
     for(LO j=0;j<p1->lj0;j++){
-      *loc_data[i][j]=*densinterpo[i][j];
+    //  *loc_data[i][j]=*densinterpo[i][j];  //attempt 1 with minimal improvements
     //  for(LO k=0;k<p3->mylk0[i];k++){
     //    loc_data[i][j][k]= densinterpo[i][j][k];  //FIXME: Here pointer is better      
     //  }
