@@ -470,10 +470,10 @@ void DatasProc3D::InitAssemDensiSendtoPart3()
     for(LO i=0;i<p3->li0;i++){
       tmpmat[i]=new double*[p3->lj0];
       for(LO j=0;j<p3->lj0;j++){
-        tmpmat[i][j]=new double[p3->mylk0[i]];
-        for(LO k=0;k<p3->mylk0[i];k++){
-          tmpmat[i][j][k]=0.0;
-        }
+        tmpmat[i][j]=new double[p3->mylk0[i]]();
+        //for(LO k=0;k<p3->mylk0[i];k++){
+        //  tmpmat[i][j][k]=0.0;
+        //}
       }
     }
 
@@ -521,8 +521,6 @@ void DatasProc3D::FreeAssemDensiSendtoPart3()
 void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 {
   PERFSTUBS_SCOPED_TIMER(__func__);
-  double starttime, endtime; 
-  //fprintf(stderr, "rank: %d ,p3->li0: %d, p3->lj0: %d p3->mylk0[0]: %d, p3->mylk0[2]: %d\n",p1->mype, p3->li0,p3->lj0,p3->mylk0[0],p3->mylk0[2]);
 
   zDensityBoundaryBufAssign(densin,bdesc);
 
@@ -537,23 +535,17 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   }
 
 // don't understand the following operation  
-  fprintf(stderr, "setup 1\n");
-  starttime = MPI_Wtime();
-  //fprintf(stderr, "rank: %d ,p1->li0: %d, p1->lj0: %d n_cuts: %d\n",p1->mype, p1->li0,p1->lj0,p1->n_cuts);
-  //fprintf(stderr, "rank: %d ,p1->npz: %d, p3->blockcount: %d p3->versurf[0]: %d, p3->versurf[1]: %d\n",p1->mype, p1->npz,p3->blockcount, p3->versurf[0], p3->versurf[1]);
 
   CV tmp1;
-  MPI_Barrier(MPI_COMM_WORLD);
-  std::copy(&densinterpo[0][0][0], &densinterpo[0][0][0]+(p1->li0)*(p1->lj0)*(p3->mylk0[p1->li0-1]), &loc_data[0][0][0]);
-  MPI_Barrier(MPI_COMM_WORLD);
-  fprintf(stderr, "Past setup 1\n");
   for(LO i=0;i<p1->li0;i++){
-   //**loc_data[i]=**densinterpo[i];  //attempt 2 with minimal improvements
+  //std::copy(&densinterpo[i][0][0], &densinterpo[i][0][0]+(p1->lj0)*(p3->mylk0[i]), &loc_data[i][0][0]);
+  //memcpy(&loc_data[i][0][0], &densinterpo[i][0][0], sizeof(LO)*(p1->li0)*(p1->lj0)*(p3->mylk0[i]));
+  //**loc_data[i]=**densinterpo[i];  //attempt 2 with minimal improvements
     for(LO j=0;j<p1->lj0;j++){
     //  *loc_data[i][j]=*densinterpo[i][j];  //attempt 1 with minimal improvements
-    //  for(LO k=0;k<p3->mylk0[i];k++){
-    //    loc_data[i][j][k]= densinterpo[i][j][k];  //FIXME: Here pointer is better      
-    //  }
+      for(LO k=0;k<p3->mylk0[i];k++){
+        loc_data[i][j][k]= densinterpo[i][j][k];  //FIXME: Here pointer is better      
+      }
       if(j>0){
         for(LO k=0;k<p3->mylk0[i];k++){
           loc_data[i][p3->lj0-j][k]=std::conj(densinterpo[i][j][k]);
@@ -571,15 +563,10 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
     }     
   }
 
-  endtime = MPI_Wtime();
-  fprintf(stderr,"rank %d setup 1 took %f seconds\n",p1->mype, endtime-starttime);
 //don't understand the above operation
-  fprintf(stderr, "setup 2\n");
-  starttime = MPI_Wtime();
-
-  LO* recvcount = new LO[p1->npz];
-  LO* rdispls = new LO[p1->npz];
-  double* blocktmp = new double[p3->blockcount];
+  LO* recvcount = new LO[p1->npz]();//optimizing for 594-597 loop
+  LO* rdispls = new LO[p1->npz]();
+  double* blocktmp = new double[p3->blockcount]();//optimizing for 589-591 loop
 
   GO sumbegin;
   LO xl;
@@ -587,15 +574,15 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 
   for(LO j=0;j<p3->lj0;j++){
     xl=0;
-    for(GO h=0;h<p3->blockcount;h++){
-      blocktmp[h] = 0.0;
-    }
+    //for(GO h=0;h<p3->blockcount;h++){
+    //  blocktmp[h] = 0.0;
+    //}
     for(LO i=0;i<p3->li0;i++){
       MPI_Datatype mpitype = getMpiType(LO());      
-      for(LO h=0;h<p1->npz;h++){
-        recvcount[h]=0;
-        rdispls[h]=0;
-      }
+      //for(LO h=0;h<p1->npz;h++){
+      //  recvcount[h]=0;
+      //  rdispls[h]=0;
+      //}
       MPI_Allgather(&p3->mylk0[i],1,mpitype,recvcount,1,mpitype,p1->comm_z); 
       rdispls[0]=0;
       for(LO k=1;k<p1->npz;k++){
@@ -641,8 +628,6 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   rdispls=NULL;
   blocktmp=NULL;
 
-  endtime = MPI_Wtime();
-  fprintf(stderr,"rank %d setup 2 took %f seconds\n",p1->mype, endtime-starttime);
 }
 
 //I dont's understand the function of the following matrix.
