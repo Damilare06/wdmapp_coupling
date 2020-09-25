@@ -312,22 +312,22 @@ void DatasProc3D::AssemPotentSendtoPart1()
     rdispls[i]=rdispls[i-1]+recvcount[i-1];
   }
 
-  CV* tmp = new CV[p1->nz0]; 
-  CV* blocktmp = new CV[p1->blockcount];
+  CV* tmp = new CV[p1->nz0](); 
+  CV* blocktmp = new CV[p1->blockcount]();
 
   GO sumbegin;
   for(LO j=0;j<p1->lj0;j++){ 
-    for(GO h=0;h<p1->blockcount;h++){
-      blocktmp[h] = CV({0.0,0.0});
-    } 
+    //for(GO h=0;h<p1->blockcount;h++){
+    //  blocktmp[h] = CV({0.0,0.0});
+    //} 
     for(LO i=0;i<p1->li0;i++){
       sumbegin=0;
       for(LO h=0;h<i;h++){
         sumbegin+=(GO)p1->nz0;
       }     
-      for(LO h=0;h<p1->nz0;h++){
-        tmp[h]=CV({0.0,0.0});
-      } 
+      //for(LO h=0;h<p1->nz0;h++){
+      //  tmp[h]=CV({0.0,0.0});
+      //} 
       MPI_Allgatherv(potentpart1[i][j],p1->lk0,MPI_CXX_DOUBLE_COMPLEX,tmp,recvcount,rdispls,
                     MPI_CXX_DOUBLE_COMPLEX,p1->comm_z);    
       for(LO m=0;m<p1->nz0;m++){
