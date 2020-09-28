@@ -69,6 +69,7 @@ public:
    int****    mat_from_ind_plane=NULL;
    int****    mat_from_ind_n=NULL; 
 
+  double se1Time = 0.0, se2Time = 0.0, exTime = 0.0, cuTime = 0.0;
 
   fftw_plan plan_forward = NULL, plan_backward = NULL;
   // The following parameters for yparal=true;

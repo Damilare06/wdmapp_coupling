@@ -471,7 +471,8 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
       }
     }
   stopTime = MPI_Wtime();
-  fprintf(stderr,"rank %d setup1 took %f seconds\n",p1->mype,  startTime-startTime);
+  se1Time +=stopTime-startTime;
+  fprintf(stderr,"rank %d setup1 took %f seconds\n",p1->mype,  se1Time);
 
   zDensityBoundaryBufAssign(densin,bdesc);
 
@@ -536,7 +537,8 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   }
 
   stopTime = MPI_Wtime();
-  fprintf(stderr,"rank %d setup2 took %f seconds\n",p1->mype,  stopTime-startTime);
+  se2Time +=stopTime-startTime;
+  fprintf(stderr,"rank %d setup2 took %f seconds\n",p1->mype,  se2Time);
   GO sumbegin;
   LO xl;
   LO num;
@@ -591,7 +593,8 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
     }
   }
   stopTime = MPI_Wtime();
-  fprintf(stderr,"rank %d exchange took %f seconds\n",p1->mype,  stopTime-startTime);
+  exTime += stopTime-startTime;
+  fprintf(stderr,"rank %d exchange took %f seconds\n",p1->mype,  exTime);
  
   startTime = MPI_Wtime();
   free(recvcount);
@@ -614,7 +617,8 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   free(tmpmat);
   tmpmat=NULL;
   stopTime = MPI_Wtime();
-  fprintf(stderr,"rank %d cleanup took %f seconds\n",p1->mype,  stopTime-startTime);
+  cuTime +=stopTime-startTime;
+  fprintf(stderr,"rank %d cleanup took %f seconds\n",p1->mype,  exTime);
 }
 
 //I dont's understand the function of the following matrix.
