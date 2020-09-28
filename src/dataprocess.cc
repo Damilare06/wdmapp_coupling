@@ -457,6 +457,9 @@ void DatasProc3D::oldAssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 // the adios2 API from coupler to Part3.
 void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 {
+  double stopTime, startTime;
+  startTime = MPI_Wtime();
+
   double*** tmpmat = new double**[p3->li0];
     for(LO i=0;i<p3->li0;i++){
       tmpmat[i]=new double*[p3->lj0];
@@ -467,6 +470,8 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
         }
       }
     }
+  stopTime = MPI_Wtime();
+  fprintf(stderr,"rank %d setup1 took %f seconds\n",p1->mype,  startTime-startTime);
 
   zDensityBoundaryBufAssign(densin,bdesc);
 
@@ -483,6 +488,7 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
 
 // don't understand the following operation  
   
+  startTime = MPI_Wtime();
   CV*** loc_data=new CV**[p1->li0];
   for(LO i=0;i<p1->li0;i++){
     loc_data[i]=new CV*[p3->lj0];
@@ -529,10 +535,13 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
     tmp[i]=new double[p3->versurf[p3->li1+i]];
   }
 
+  stopTime = MPI_Wtime();
+  fprintf(stderr,"rank %d setup2 took %f seconds\n",p1->mype,  stopTime-startTime);
   GO sumbegin;
   LO xl;
   LO num;
 
+  startTime = MPI_Wtime();
   for(LO j=0;j<p3->lj0;j++){
     xl=0;
     for(GO h=0;h<p3->blockcount;h++){
@@ -581,7 +590,10 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
         denssend[j*p3->blockcount+h] = blocktmp[h]*p1->norm_fact_dens;
     }
   }
+  stopTime = MPI_Wtime();
+  fprintf(stderr,"rank %d exchange took %f seconds\n",p1->mype,  stopTime-startTime);
  
+  startTime = MPI_Wtime();
   free(recvcount);
   free(rdispls);
   free(blocktmp);
@@ -601,6 +613,8 @@ void DatasProc3D::AssemDensiSendtoPart3(BoundaryDescr3D& bdesc)
   }
   free(tmpmat);
   tmpmat=NULL;
+  stopTime = MPI_Wtime();
+  fprintf(stderr,"rank %d cleanup took %f seconds\n",p1->mype,  stopTime-startTime);
 }
 
 //I dont's understand the function of the following matrix.
