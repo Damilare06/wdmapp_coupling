@@ -8,7 +8,7 @@ set(HEADERS coupling.h
 
 add_library(coupler ${SOURCES})
 set_target_properties(coupler PROPERTIES PUBLIC_HEADER "${HEADERS}")
-target_link_libraries(coupler adios2::adios2 Kokkos::kokkos PkgConfig::fftw MPI::MPI_CXX)
+target_link_libraries(coupler adios2::adios2 PkgConfig::fftw)
 
 add_executable(cpl cpl.cc)
 target_link_libraries(cpl coupler)

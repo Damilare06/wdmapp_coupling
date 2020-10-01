@@ -4,9 +4,9 @@
 namespace coupler {
 
   Array2d<double>* receive_density(const std::string cce_folder,
-  		    adios2::IO &io, adios2::Engine &engine) {
+  		    adios2_handler &handler){
     const std::string name = "gem_density";
-    return receive2d_from_ftn<double>(cce_folder,name, io, engine);
+    return receive2d_from_ftn<double>(cce_folder,name, handler.IO, handler.eng);
   }
 
   void send_density(const std::string cce_folder, const Array2d<double>* density,

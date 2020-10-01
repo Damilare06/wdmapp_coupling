@@ -5,7 +5,7 @@
 #include <iostream>
 #include <mpi.h>
 #include <cassert>
-#include <Kokkos_Core.hpp>
+//#include <Kokkos_Core.hpp>
 #include <typeinfo>
 #include <fftw3.h>
 
@@ -203,12 +203,15 @@ namespace coupler {
   
     const std::string fname = dir + "/" + name + ".bp";
   
+      if(!rank) std::cerr << rank << ": 0.0 \n";
     if(!eng){
       read_io.SetEngine("Sst");
+      if(!rank) std::cerr << rank << ": 0.1 \n";
       read_io.SetParameters({
           {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "480"}
           });
+      if(!rank) std::cerr << rank << ": 0.2 \n";
       eng = read_io.Open(fname, adios2::Mode::Read);
       std::cerr << rank << ": " << name << " engine created\n";
     }
@@ -285,7 +288,7 @@ namespace coupler {
   
 
   Array2d<double>* receive_density(const std::string cce_folder,
-  		    adios2::IO &io, adios2::Engine &engine);
+      adios2_handler &handler);
 
   void send_density(const std::string cce_folder, const Array2d<double>* density,
       adios2::IO &io, adios2::Engine &engine, adios2::Variable<double> &send_id);
