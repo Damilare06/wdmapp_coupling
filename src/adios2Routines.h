@@ -177,7 +177,7 @@ namespace coupler {
     const std::string fname = dir + "/" + name + ".bp";
   
     if(!eng){
-      read_io.SetEngine("BP4");
+      read_io.SetEngine("Sst");
       read_io.SetParameters({
           {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "480"}
@@ -233,7 +233,7 @@ namespace coupler {
     const std::string fname = dir + "/" + name + ".bp";
   
     if(!eng){
-      read_io.SetEngine("BP4");
+      read_io.SetEngine("Sst");
       read_io.SetParameters({
           {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "480"}
@@ -278,7 +278,7 @@ namespace coupler {
     std::cout<<fname<<'\n'; 
     if(m==0){
       std::cout<<"creat engine for: "<<name<<'\n';
-      read_io.SetEngine("BP4");
+      read_io.SetEngine("Sst");
       read_io.SetParameters({
           {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "800"}
@@ -328,7 +328,7 @@ namespace coupler {
     std::cout<<fname<<'\n'; 
     if(m==0){
       std::cout<<"creat engine for: "<<name<<'\n';
-      read_io.SetEngine("BP4");
+      read_io.SetEngine("Sst");
       read_io.SetParameters({
           {"DataTransport","RDMA"},
           {"OpenTimeoutSecs", "800"}
@@ -379,7 +379,7 @@ namespace coupler {
     const::adios2::Dims l_dims({a2d->localW(), a2d->localH()});
     const std::string fname = dir + "/" + name + ".bp";
     if (!engine){
-      coupling_io.SetEngine("BP4");
+      coupling_io.SetEngine("Sst");
       send_id = coupling_io.DefineVariable<T>(name,
           g_dims, g_offset, l_dims);
       adios2::Engine  engine = coupling_io.Open(fname, adios2::Mode::Write);
@@ -432,7 +432,7 @@ template<typename T>
     const std::string fname = cce_folder + "/" + fldname + ".bp";
   
     if(m==0){
-      sendIO.SetEngine("BP4");
+      sendIO.SetEngine("Sst");
       sendIO.SetParameters({
       {"OpenTimeoutSecs", "480"}
           });
