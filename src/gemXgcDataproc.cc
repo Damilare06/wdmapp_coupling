@@ -246,6 +246,8 @@ namespace coupler {
 
 void gemXgcDatasProc3D::DistriPotentRecvfromXGC(const Array2d<double>* fieldfromXGC)
 {
+  MPI_Barrier(MPI_COMM_WORLD);
+  fprintf(stderr, "ABJ 2.0\n");
   double*** tmp=new double**[p1->li0];
   for(LO i=0;i<p1->li0;i++){
     tmp[i]=new double*[p3->nphi];
@@ -254,18 +256,22 @@ void gemXgcDatasProc3D::DistriPotentRecvfromXGC(const Array2d<double>* fieldfrom
     }
   }    
 
+  MPI_Barrier(MPI_COMM_WORLD);
+  fprintf(stderr, "ABJ 2.1\n");
   //FIXME: distribute potentfromXGC->datas() to tmp;
   double* potent=fieldfromXGC->data();  
   LO n=0;
   for(LO i=0;i<p1->li0;i++){
     for(LO j=0;j<p3->nphi;j++){
-      for(LO k=0;k<p3->versurf[i+p1->li1];j++){
+      for(LO k=0;k<p3->versurf[i+p1->li1];k++){
         n++;
         tmp[i][j][k]=potent[n];
       }
     }
   }  
 
+  MPI_Barrier(MPI_COMM_WORLD);
+  fprintf(stderr, "ABJ 2.2\n");
 
   // First interpolation along the field line; 
   double* tmppotent;
@@ -281,19 +287,35 @@ void gemXgcDatasProc3D::DistriPotentRecvfromXGC(const Array2d<double>* fieldfrom
       for(LO k=0;k<p3->mylk0[i];k++){ 
         for(LO h=0;h<4;h++){
           tmppotent=p3->thetaflx_pot[i][j][k][h];
+        fprintf(stderr, "ABJ 2.20 i: %d, j: %d, k: %d, h: %d, theta: %d vs vers: %d, outside lagrange interpo\n", i,j,k,h,p3->thetaflx_ind_pot[i][j][k][h][0], p3->versurf[i+p1->li1]);
+        fprintf(stderr, "ABJ 2.20 i: %d, j: %d, k0: %d, outside lagrange interpo\n", i,j,tmp[0][0][p3->thetaflx_ind_pot[i][j][k][h][0]]);
           for(LO l=0;l<4;l++) tmpflx[l]=tmp[i][j][p3->thetaflx_ind_pot[i][j][k][h][l]];
+        MPI_Barrier(MPI_COMM_WORLD);
+        fprintf(stderr, "ABJ 2.201 i: %d, j: %d, k: %d , outside lagrange interpo\n", i,j,k);
           pot_gem_fl[i][j][k][h]=Lag3dInterpo1D(tmppotent,tmpflx,p3->thetaflx_pot[i][j][k][h][4]); 
+        MPI_Barrier(MPI_COMM_WORLD);
+        fprintf(stderr, "ABJ 2.202 i: %d, j: %d, k: %d , outside lagrange interpo\n", i,j,k);
         }
+        MPI_Barrier(MPI_COMM_WORLD);
+        fprintf(stderr, "ABJ 2.203 i: %d, j: %d, k: %d , out of the loop\n", i,j,k);
         tmppotent=pot_gem_fl[i][j][k];
         tmplength=p3->nodesdist_fl[i][j][k];
+        MPI_Barrier(MPI_COMM_WORLD);
+        fprintf(stderr, "ABJ 2.20 i: %d, j: %d, k: %d , p3->nodesdist_fl[i][j][k][4]: %d \n", i,j,k,p3->nodesdist_fl[i][j][k][4]);
         potyCpl[i][j][k]=Lag3dInterpo1D(tmppotent,tmplength,p3->nodesdist_fl[i][j][k][4]);     
+        MPI_Barrier(MPI_COMM_WORLD);
+        fprintf(stderr, "ABJ 2.20 i: %d, j: %d, k: %d , n: %d \n", i,j,k,n);
       }
     } 
   }  
+  MPI_Barrier(MPI_COMM_WORLD);
+  fprintf(stderr, "ABJ 2.3\n");
 
   // The 2nd interpolation along theta
   InterpoPotential3DAlongZ(potyCpl,potythCpl);  
   potentFromCouplerToGem(fieldfromXGC);
+  MPI_Barrier(MPI_COMM_WORLD);
+  fprintf(stderr, "ABJ 2.4\n");
 }
 
 
