@@ -593,6 +593,7 @@ void Part3Mesh3D::initXgcGem(const Array1d<LO>* xgccouple,const Array1d<double>*
         search_flux_3rdorder_periodbound(tmpflx,theta_flx[i],versurf[p1->li1+i], flxinter);
         for (LO h=0; h<5; h++) thetaflx_pot[i][j][k][3][h] = flxinter.flxt[h];
         for(LO h=0; h<4; h++) thetaflx_ind_pot[i][j][k][3][h] = flxinter.flxtind[h];        
+        fprintf(stderr, "ABJ 30, theta: %d \n", thetaflx_ind_pot[0][0][0][0][0]);
       
 	nodesdist_fl[i][j][k][0] = 0.0;
 	nodesdist_fl[i][j][k][1] = sqrt(pow(thetaflx_pot[i][j][k][1][4] - thetaflx_pot[i][j][k][0][4],2)
@@ -608,7 +609,6 @@ void Part3Mesh3D::initXgcGem(const Array1d<LO>* xgccouple,const Array1d<double>*
       }
     }
   }
-//  }
   
   delete[] tmpthetaeq;
   for (LO i=0; i<p1->li0; i++) delete[] tmptheta[i];
